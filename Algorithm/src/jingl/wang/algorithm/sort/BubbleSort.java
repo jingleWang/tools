@@ -1,4 +1,4 @@
-package jingl.wang.algorithm;
+package jingl.wang.algorithm.sort;
 
 /**
  * Created by Wang Jinglu on 2017/9/15.

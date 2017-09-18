@@ -12,6 +12,7 @@
         <module>wordcorrection</module>
         <module>security</module>
         <module>spring</module>
+        <module>spring-boot</module>
     </modules>
 
 

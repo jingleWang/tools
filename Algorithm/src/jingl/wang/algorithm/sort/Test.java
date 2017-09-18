@@ -1,13 +1,13 @@
-package jingl.wang.algorithm;
+package jingl.wang.algorithm.sort;
 
 /**
  * Created by Wang Jinglu on 2017/9/15.
  */
-public class test {
+public class Test {
     public static void main(String[] args) {
-        int[] data = getArray(10);
+        int[] data = getArray(5);
         print(data);
-        HellSort.sort(data);
+        HeapSort.sort(data);
         print(data);
 
     }
@@ -15,7 +15,7 @@ public class test {
     public static int[] getArray(int c) {
         int[] array = new int[c];
         for (int i = 0; i<c; i++) {
-            array[i] = (int) (Math.random() * 1000);
+            array[i] = (int) (Math.random() * 100);
         }
         return array;
     }
