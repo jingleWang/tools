@@ -5,9 +5,10 @@ package jingl.wang.algorithm.sort;
  */
 public class Test {
     public static void main(String[] args) {
-        int[] data = getArray(5);
+//        int[] data = getArray(5);
+        int[] data = {92,87,12,47,62};
         print(data);
-        HeapSort.sort(data);
+        QuickSort.sort(data);
         print(data);
 
     }
