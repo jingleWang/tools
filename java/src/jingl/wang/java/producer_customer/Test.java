@@ -1,70 +1,104 @@
 package jingl.wang.java.producer_customer;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
+import sun.jvm.hotspot.utilities.Assert;
+import sun.misc.Unsafe;
+
+import java.lang.reflect.Field;
 
 /**
  * Created by Ben on 26/09/2017.
  */
 public class Test {
 
+    public static Unsafe unsafe = getUnSafe();
 
-//    public static void main(String[] args) {
-//        BlockingQueue<Integer> queue = new ArrayBlockingQueue<Integer>(10);
-//
-//
-//        Thread p = new Thread(new Runnable() {
-//            int count = 0;
-//            @Override
-//            public void run() {
-//                while (true) {
-//                    if (count > 100) return;
-//                    try {
-//                        queue.put(count);
-//                        System.out.println("add: " + count);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                    count++;
-//                }
-//            }
-//        });
-//        p.start();
-//
-//        Thread c = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                while (true) {
-//                    try {
-//                        int v = queue.take();
-//                        System.out.println("delete: " + v);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        });
-//        c.start();
-//
-//    }
 
     public static void main(String[] args) throws InterruptedException {
-        final AtomicInteger data = new AtomicInteger(0);
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    data.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                data.addAndGet(1);
-            }
-        }).start();
-        synchronized (data) {
-            data.notify();
-            Thread.sleep(100000);
+        AThread aThread = new AThread();
+        Thread thread = new Thread(aThread);
+
+        AThread aThread1 = new AThread();
+        Thread thread1 = new Thread(aThread1);
+//        thread.start();
+        thread1.start();
+
+        Thread.sleep(1000);
+        AThread.lock = 1;
+        System.out.println(AThread.lock);
+    }
+
+    public static class AThread implements Runnable {
+
+        static int lock;
+        Integer value;
+        static int i = 0;
+
+        public AThread() {
+            this.lock = 0;
+            this.value = 0;
         }
+
+        public void run() {
+//            add(); //累加
+            test1();
+        }
+
+        public void test1() {
+            while (lock == 0) {
+
+                int l = unsafe.getInt(AThread.class, lockOffset);
+//                System.out.println(l);
+            }
+
+//            int l = unsafe.getInt(AThread.class, lockOffset);
+//            System.out.println(l);
+            System.out.println("thread end");
+        }
+
+        public void add() {
+            for (int j = 0; j < 100000; j++) {
+                while (!tryAccquire()) {
+                }
+                i++;
+                release();
+            }
+        }
+
+        public static boolean tryAccquire() {
+            return unsafe.compareAndSwapInt(AThread.class, lockOffset, 0, 1);
+        }
+
+        public static void release() {
+            unsafe.putInt(AThread.class, lockOffset, 0);
+        }
+
+        private static long lockOffset;
+
+        static {
+            try {
+                lockOffset = unsafe.staticFieldOffset(AThread.class.getDeclaredField("lock"));
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+    public static Unsafe getUnSafe() {
+        Field f = null; //Internal reference
+        try {
+            f = Unsafe.class.getDeclaredField("theUnsafe");
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        f.setAccessible(true);
+        try {
+            Unsafe unsafe = (Unsafe) f.get(null);
+            return unsafe;
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
 
